@@ -23,7 +23,7 @@ import net.minecraft.util.MovementInput
 import kotlin.math.abs
 
 object Sprint : Module("Sprint", Category.MOVEMENT, gameDetecting = false) {
-    val mode by ListValue("Mode", arrayOf("Legit", "Vanilla"), "Vanilla")
+    val mode by choices("Mode", arrayOf("Legit", "Vanilla"), "Vanilla")
 
     val onlyOnSprintPress by boolean("OnlyOnSprintPress", false)
     private val alwaysCorrect by boolean("AlwaysCorrectSprint", false)
@@ -155,7 +155,6 @@ object Sprint : Module("Sprint", Category.MOVEMENT, gameDetecting = false) {
         return modifiedForward < threshold
     }
 
-    // Add getter methods for Java interop
     fun getCheckHunger(): Boolean = checkHunger.get()
     fun getCheckCollision(): Boolean = checkCollision.get()
     fun getCheckSneaking(): Boolean = checkSneaking.get()
