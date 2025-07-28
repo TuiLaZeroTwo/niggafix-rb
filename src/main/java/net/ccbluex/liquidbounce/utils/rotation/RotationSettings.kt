@@ -5,6 +5,7 @@
  */
 package net.ccbluex.liquidbounce.utils.rotation
 
+import net.ccbluex.liquidbounce.LiquidBounce
 import net.ccbluex.liquidbounce.config.Configurable
 import net.ccbluex.liquidbounce.config.ListValue
 import net.ccbluex.liquidbounce.features.module.Module
