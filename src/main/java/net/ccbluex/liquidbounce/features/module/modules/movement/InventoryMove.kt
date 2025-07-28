@@ -16,6 +16,7 @@ import net.ccbluex.liquidbounce.utils.inventory.InventoryManager.canClickInvento
 import net.ccbluex.liquidbounce.utils.inventory.InventoryManager.hasScheduledInLastLoop
 import net.ccbluex.liquidbounce.utils.inventory.InventoryUtils.serverOpenContainer
 import net.ccbluex.liquidbounce.utils.inventory.InventoryUtils.serverOpenInventory
+import net.ccbluex.liquidbounce.config.*
 import net.minecraft.client.gui.GuiChat
 import net.minecraft.client.gui.GuiIngameMenu
 import net.minecraft.client.gui.GuiScreen
@@ -56,6 +57,9 @@ object InventoryMove : Module("InventoryMove", Category.MOVEMENT, gameDetecting 
     ) { silentlyCloseAndReopen && noMove && (noMoveAir || noMoveGround) }
 
     private val inventoryMotion by float("InventoryMotion", 1F, 0F..2F)
+
+    private val noSprint by boolean("NoSprint", true)
+    private val invOpen by boolean("InvOpen", true)
 
     private val affectedBindings = arrayOf(
         mc.gameSettings.keyBindForward,
@@ -165,6 +169,9 @@ object InventoryMove : Module("InventoryMove", Category.MOVEMENT, gameDetecting 
             it.pressed = false
         }
     }
+
+    fun getNoSprint(): Boolean = noSprint.get()
+    fun getInvOpen(): Boolean = invOpen.get()
 
     override val tag
         get() = when {
