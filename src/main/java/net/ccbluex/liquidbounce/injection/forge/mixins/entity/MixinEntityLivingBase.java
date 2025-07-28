@@ -77,26 +77,31 @@ public abstract class MixinEntityLivingBase extends MixinEntity {
 
     /**
      * @author CCBlueX
+     * Modified to include StrafeFix functionality from FDPClient
      */
     @Overwrite
     protected void jump() {
-        final JumpEvent prejumpEvent = new JumpEvent(getJumpUpwardsMotion(), EventState.PRE);
-        if ((Object) this == Minecraft.getMinecraft().thePlayer) {
-            EventManager.INSTANCE.call(prejumpEvent);
-            if (prejumpEvent.isCancelled()) return;
+        if (!((EntityLivingBase) (Object) this).equals(Minecraft.getMinecraft().thePlayer)) {
+            return;
         }
 
-        motionY = prejumpEvent.getMotion();
+        final JumpEvent preJumpEvent = new JumpEvent(MovementUtils.INSTANCE.getJumpMotion(), EventState.PRE);
+        EventManager.INSTANCE.call(preJumpEvent);
+        if (preJumpEvent.isCancelled()) return;
+
+        motionY = preJumpEvent.getMotion();
 
         if (isPotionActive(Potion.jump))
             motionY += (float) (getActivePotionEffect(Potion.jump).getAmplifier() + 1) * 0.1F;
+
+        final RinStrafe strafeFix = RinStrafe.INSTANCE;
+        final Sprint sprint = Sprint.INSTANCE;
 
         if (isSprinting()) {
             float fixedYaw = this.rotationYaw;
             final RotationUtils rotationUtils = RotationUtils.INSTANCE;
             final Rotation currentRotation = rotationUtils.getCurrentRotation();
             final RotationSettings rotationData = rotationUtils.getActiveSettings();
-            final RinStrafe strafeFix = RinStrafe.INSTANCE;
 
             if (currentRotation != null && rotationData != null && rotationData.getStrafe()) {
                 fixedYaw = currentRotation.getYaw();
@@ -106,7 +111,6 @@ public abstract class MixinEntityLivingBase extends MixinEntity {
                 fixedYaw = rotationUtils.getTargetRotation().getYaw();
             }
 
-            final Sprint sprint = Sprint.INSTANCE;
             if (sprint.handleEvents() && sprint.getMode().equals("Vanilla") && sprint.getAllDirections() && sprint.getJumpDirections()) {
                 fixedYaw += MathExtensionsKt.toDegreesF(MovementUtils.INSTANCE.getDirection()) - this.rotationYaw;
             }
@@ -118,20 +122,16 @@ public abstract class MixinEntityLivingBase extends MixinEntity {
             if (strafeFix.getDoFix()) {
                 StrafeEvent strafeEvent = new StrafeEvent((float) motionX, (float) motionZ, 0.0F);
                 EventManager.INSTANCE.call(strafeEvent);
-                if (strafeFix != null) {
-                    strafeFix.runStrafeFixLoop(strafeFix.getSilentFix(), strafeEvent);
-                    motionX = strafeEvent.getStrafe();
-                    motionZ = strafeEvent.getForward();
-                }
+                strafeFix.runStrafeFixLoop(strafeFix.getSilentFix(), strafeEvent);
+                motionX = strafeEvent.getStrafe();
+                motionZ = strafeEvent.getForward();
             }
         }
 
         isAirBorne = true;
 
-        if ((Object) this == Minecraft.getMinecraft().thePlayer) {
-            final JumpEvent postJumpEvent = new JumpEvent((float) motionY, EventState.POST);
-            EventManager.INSTANCE.call(postJumpEvent);
-        }
+        final JumpEvent postJumpEvent = new JumpEvent((float) motionY, EventState.POST);
+        EventManager.INSTANCE.call(postJumpEvent);
     }
 
     @Inject(method = "onLivingUpdate", at = @At("HEAD"))

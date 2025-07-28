@@ -1,6 +1,6 @@
 /*
  * LiquidBounce Hacked Client
- * A free          floatRange("VerticalAngleChange", 180f..180f, 1f..720f) { rotationsActive && generalApply() }     floatRange("HorizontalAngleChange", 180f..180f, 1f..720f) { rotationsActive && generalApply() }open source mixin-based injection hacked client for Minecraft using Minecraft Forge.
+ * A free open source mixin-based injection hacked client for Minecraft using Minecraft Forge.
  * https://github.com/CCBlueX/LiquidBounce/
  */
 package net.ccbluex.liquidbounce.utils.rotation
@@ -8,6 +8,7 @@ package net.ccbluex.liquidbounce.utils.rotation
 import net.ccbluex.liquidbounce.config.Configurable
 import net.ccbluex.liquidbounce.config.ListValue
 import net.ccbluex.liquidbounce.features.module.Module
+import net.ccbluex.liquidbounce.features.module.modules.movement.RinStrafe
 import net.ccbluex.liquidbounce.utils.extensions.random
 import net.ccbluex.liquidbounce.utils.extensions.withGCD
 import kotlin.math.abs
@@ -31,6 +32,7 @@ open class RotationSettings(owner: Module, generalApply: () -> Boolean = { true 
     open val shortStopDurationValue = intRange("ShortStopDuration", 1..2, 1..5) { simulateShortStop }
     open val strafeValue = boolean("Strafe", false) { rotationsActive && applyServerSide && generalApply() }
     open val strictValue = boolean("Strict", false) { strafeValue.isActive() && generalApply() }
+    open val strafeModeValue = ListValue("StrafeMode", arrayOf("Off", "Strict", "Silent"), "Silent") { rotationsActive && applyServerSide && generalApply() }
     open val keepRotationValue = boolean("KeepRotation", true) { rotationsActive && applyServerSide && generalApply() }
 
     open val resetTicksValue = int("ResetTicks", 1, 1..20) {
@@ -65,6 +67,7 @@ open class RotationSettings(owner: Module, generalApply: () -> Boolean = { true 
     val shortStopDuration by shortStopDurationValue
     val strafe by strafeValue
     val strict by strictValue
+    val strafeMode by strafeModeValue
     val keepRotation by keepRotationValue
     val resetTicks by resetTicksValue
     val legitimize by legitimizeValue
@@ -112,6 +115,15 @@ open class RotationSettings(owner: Module, generalApply: () -> Boolean = { true 
         }
 
         return true
+    }
+
+    /**
+     * Apply strafe fix logic in RinStrafe module to Killaura, kys if you tell me this is AI
+     */
+    fun applyStrafeFix() {
+        if (!rotationsActive || !applyServerSide || strafeMode == "Off") return
+        val rinStrafe = RinStrafe.INSTANCE
+        rinStrafe.applyForceStrafe(strafeMode == "Silent", strafeMode != "Off")
     }
 
     init {

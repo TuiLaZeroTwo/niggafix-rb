@@ -145,10 +145,8 @@ public abstract class MixinEntityPlayerSP extends MixinAbstractClientPlayer {
         final Sneak sneak = Sneak.INSTANCE;
         final Derp derp = Derp.INSTANCE;
         final RinStrafe strafeFix = RinStrafe.INSTANCE;
-
-        if (strafeFix != null) {
-            strafeFix.updateOverwrite();
-        }
+        strafeFix.updateOverwrite();
+    
 
         final boolean fakeSprint = inventoryMove.handleEvents() && inventoryMove.getAacAdditionPro()
                 || AntiHunger.INSTANCE.handleEvents()
@@ -304,6 +302,10 @@ public abstract class MixinEntityPlayerSP extends MixinAbstractClientPlayer {
         EventManager.INSTANCE.call(UpdateEvent.INSTANCE);
 
         final RinStrafe strafeFix = RinStrafe.INSTANCE;
+        final Sprint sprint = Sprint.INSTANCE;
+        final NoSlow noSlow = NoSlow.INSTANCE;
+        final KillAura killAura = KillAura.INSTANCE;
+        final InventoryMove inventoryMove = InventoryMove.INSTANCE;
 
         if (sprintingTicksLeft > 0) {
             --sprintingTicksLeft;
@@ -355,11 +357,68 @@ public abstract class MixinEntityPlayerSP extends MixinAbstractClientPlayer {
             --timeUntilPortal;
         }
 
-        boolean flag = movementInput.jump;
-        boolean flag1 = movementInput.sneak;
-        float f = 0.8F;
-        boolean flag2 = movementInput.moveForward >= f;
+        boolean lastForwardToggleState = movementInput.moveForward > 0.05f;
+        boolean lastJumpToggleState = movementInput.jump;
+
         movementInput.updatePlayerMoveState();
+
+        boolean isSprintDirection = false;
+        boolean movingStat = Math.abs(movementInput.moveForward) > 0.05f || Math.abs(movementInput.moveStrafe) > 0.05f;
+        boolean runStrictStrafe = strafeFix.getDoFix() && !strafeFix.getSilentFix();
+        boolean noStrafe = RotationUtils.INSTANCE.getTargetRotation() == null || !strafeFix.getDoFix();
+
+        if (!movingStat || runStrictStrafe || noStrafe) {
+            isSprintDirection = movementInput.moveForward > 0.05f;
+        } else {
+            isSprintDirection = Math.abs(RotationUtils.INSTANCE.getAngleDifference(MovementUtils.INSTANCE.getMovingYaw(), RotationUtils.INSTANCE.getTargetRotation().getYaw())) < 67.0f;
+        }
+
+        if (!movingStat) {
+            isSprintDirection = false;
+        }
+
+        boolean attemptToggle = sprint.handleEvents() || isSprinting() || mc.gameSettings.keyBindSprint.isKeyDown();
+        boolean baseIsMoving = (sprint.handleEvents() && sprint.getAllDirections() && (Math.abs(movementInput.moveForward) > 0.05f || Math.abs(movementInput.moveStrafe) > 0.05f)) || isSprintDirection;
+        boolean baseSprintState = (!sprint.getCheckHunger() && sprint.handleEvents() || (float) getFoodStats().getFoodLevel() > 6.0F || capabilities.allowFlying) && baseIsMoving && (!isCollidedHorizontally || sprint.getCheckCollision()) && (!isSneaking() || sprint.getCheckSneaking()) && !isPotionActive(Potion.blindness);
+        boolean canToggleSprint = onGround && !movementInput.jump && !movementInput.sneak && !isPotionActive(Potion.blindness);
+        boolean isCurrentUsingItem = getHeldItem() != null && (isUsingItem() || (getHeldItem().getItem() instanceof ItemSword && killAura.getBlockStatus()) || NoSlow.INSTANCE.isUNCPBlocking());
+        boolean isCurrentUsingSword = getHeldItem() != null && getHeldItem().getItem() instanceof ItemSword && (killAura.getBlockStatus() || isUsingItem());
+
+        baseSprintState = baseSprintState && !(inventoryMove.handleEvents() && inventoryMove.getNoSprint() && inventoryMove.getInvOpen());
+
+        if (!attemptToggle && !lastForwardToggleState && baseSprintState && !isSprinting() && canToggleSprint && !isCurrentUsingItem && !isPotionActive(Potion.blindness)) {
+            if (sprintToggleTimer <= 0 && !mc.gameSettings.keyBindSprint.isKeyDown()) {
+                sprintToggleTimer = 7;
+            } else {
+                attemptToggle = true;
+            }
+        }
+
+        if (sprint.getForceSprint() || baseSprintState && (!isCurrentUsingItem || (sprint.getUseItem() && (!sprint.getUseItemSword() || isCurrentUsingSword))) && attemptToggle) {
+            setSprinting(true);
+        } else {
+            setSprinting(false);
+        }
+
+        // Update Sprint State - Post
+        movingStat = Math.abs(movementInput.moveForward) > 0.05f || Math.abs(movementInput.moveStrafe) > 0.05f;
+        runStrictStrafe = strafeFix.getDoFix() && !strafeFix.getSilentFix();
+        noStrafe = RotationUtils.INSTANCE.getTargetRotation() == null || !strafeFix.getDoFix();
+
+        if (!movingStat || runStrictStrafe || noStrafe) {
+            isSprintDirection = movementInput.moveForward > 0.05f;
+        } else {
+            isSprintDirection = Math.abs(RotationUtils.INSTANCE.getAngleDifference(MovementUtils.INSTANCE.getMovingYaw(), RotationUtils.INSTANCE.getTargetRotation().getYaw())) < 67.0f;
+        }
+
+        baseIsMoving = (sprint.handleEvents() && sprint.getAllDirections() && (Math.abs(movementInput.moveForward) > 0.05f || Math.abs(movementInput.moveStrafe) > 0.05f)) || isSprintDirection;
+        baseSprintState = (!sprint.getCheckHunger() && sprint.handleEvents() || (float) getFoodStats().getFoodLevel() > 6.0F || capabilities.allowFlying) && baseIsMoving && (!isCollidedHorizontally || sprint.getCheckCollision()) && (!isSneaking() || sprint.getCheckSneaking()) && !isPotionActive(Potion.blindness);
+
+        if (sprint.getForceSprint() || baseSprintState && (!isCurrentUsingItem || (sprint.getUseItem() && (!sprint.getUseItemSword() || isCurrentUsingSword))) && attemptToggle) {
+            setSprinting(true);
+        } else {
+            setSprinting(false);
+        }
 
         RotationUtils utils = RotationUtils.INSTANCE;
         final Rotation currentRotation = utils.getCurrentRotation();
@@ -408,12 +467,7 @@ public abstract class MixinEntityPlayerSP extends MixinAbstractClientPlayer {
             modifiedInput.moveForward = secondSneakSlowDownEvent.getForward();
         }
 
-        final NoSlow noSlow = NoSlow.INSTANCE;
-        final KillAura killAura = KillAura.INSTANCE;
-
-        boolean isUsingItem = getHeldItem() != null && (isUsingItem() || (getHeldItem().getItem() instanceof ItemSword && killAura.getBlockStatus()) || NoSlow.INSTANCE.isUNCPBlocking());
-
-        if (isUsingItem && !isRiding()) {
+        if (isCurrentUsingItem && !isRiding()) {
             final SlowDownEvent slowDownEvent = new SlowDownEvent(0.2F, 0.2F);
             EventManager.INSTANCE.call(slowDownEvent);
             movementInput.moveStrafe *= slowDownEvent.getStrafe();
@@ -430,10 +484,8 @@ public abstract class MixinEntityPlayerSP extends MixinAbstractClientPlayer {
         pushOutOfBlocks(posX + width * 0.35, getEntityBoundingBox().minY + 0.5, posZ - width * 0.35);
         pushOutOfBlocks(posX + width * 0.35, getEntityBoundingBox().minY + 0.5, posZ + width * 0.35);
 
-        final Sprint sprint = Sprint.INSTANCE;
-
         boolean flag3 = (float) getFoodStats().getFoodLevel() > 6F || capabilities.allowFlying;
-        if (onGround && !flag1 && !flag2 && movementInput.moveForward >= f && !isSprinting() && flag3 && !isUsingItem() && !isPotionActive(Potion.blindness)) {
+        if (onGround && !movementInput.sneak && !lastForwardToggleState && movementInput.moveForward >= 0.8F && !isSprinting() && flag3 && !isCurrentUsingItem && !isPotionActive(Potion.blindness)) {
             if (sprintToggleTimer <= 0 && !mc.gameSettings.keyBindSprint.isKeyDown()) {
                 sprintToggleTimer = 7;
             } else {
@@ -441,17 +493,17 @@ public abstract class MixinEntityPlayerSP extends MixinAbstractClientPlayer {
             }
         }
 
-        if (!isSprinting() && movementInput.moveForward >= f && flag3 && (noSlow.handleEvents() || !isUsingItem()) && !isPotionActive(Potion.blindness) && mc.gameSettings.keyBindSprint.isKeyDown()) {
+        if (!isSprinting() && movementInput.moveForward >= 0.8F && flag3 && (noSlow.handleEvents() || !isCurrentUsingItem) && !isPotionActive(Potion.blindness) && mc.gameSettings.keyBindSprint.isKeyDown()) {
             setSprinting(true);
         }
 
-        if (isSprinting() && (movementInput.moveForward < f || isCollidedHorizontally || !flag3)) {
+        if (isSprinting() && (movementInput.moveForward < 0.8F || isCollidedHorizontally || !flag3)) {
             setSprinting(false);
         }
 
         EventManager.INSTANCE.call(PostSprintUpdateEvent.INSTANCE);
 
-        sprint.correctSprintState(modifiedInput, isUsingItem);
+        sprint.correctSprintState(modifiedInput, isCurrentUsingItem);
 
         if (capabilities.allowFlying) {
             if (mc.playerController.isSpectatorMode()) {
@@ -459,7 +511,7 @@ public abstract class MixinEntityPlayerSP extends MixinAbstractClientPlayer {
                     capabilities.isFlying = true;
                     sendPlayerAbilities();
                 }
-            } else if (!flag && movementInput.jump) {
+            } else if (!lastJumpToggleState && movementInput.jump) {
                 if (flyToggleTimer == 0) {
                     flyToggleTimer = 7;
                 } else {
@@ -489,13 +541,13 @@ public abstract class MixinEntityPlayerSP extends MixinAbstractClientPlayer {
                 }
             }
 
-            if (flag && !movementInput.jump) {
+            if (lastJumpToggleState && !movementInput.jump) {
                 horseJumpPowerCounter = -10;
                 sendHorseJump();
-            } else if (!flag && movementInput.jump) {
+            } else if (!lastJumpToggleState && movementInput.jump) {
                 horseJumpPowerCounter = 0;
                 horseJumpPower = 0f;
-            } else if (flag) {
+            } else if (lastJumpToggleState) {
                 ++horseJumpPowerCounter;
 
                 if (horseJumpPowerCounter < 10) {
@@ -517,7 +569,9 @@ public abstract class MixinEntityPlayerSP extends MixinAbstractClientPlayer {
     }
 
     @Override
-    public void moveEntity(double x, double y, double z) {
+    public void moveEntityємо
+
+(double x, double y, double z) {
         MoveEvent moveEvent = new MoveEvent(x, y, z);
         EventManager.INSTANCE.call(moveEvent);
 

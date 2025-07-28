@@ -257,10 +257,11 @@ public abstract class MixinEntity implements IMixinEntity {
         final RinStrafe strafeFix = RinStrafe.INSTANCE;
         EventManager.INSTANCE.call(strafeEvent);
 
-        if (strafeFix.getDoFix()) { 
+        if (strafeFix.getDoFix()) {
             strafeFix.runStrafeFixLoop(strafeFix.getSilentFix(), strafeEvent);
-            if (strafeEvent.isCancelled()) callbackInfo.cancel();
         }
+
+        if (strafeEvent.isCancelled()) callbackInfo.cancel();
     }
 
     @Inject(method = "isInWater", at = @At("HEAD"), cancellable = true)
