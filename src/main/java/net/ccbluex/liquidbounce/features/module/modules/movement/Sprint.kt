@@ -31,7 +31,7 @@ object Sprint : Module("Sprint", Category.MOVEMENT, gameDetecting = false) {
     val allDirections by boolean("AllDirections", true) { mode == "Vanilla" }
     val jumpDirections by boolean("JumpDirections", false) { mode == "Vanilla" && allDirections }
 
-    private val allDirectionsLimitSpeed by FloatValue("AllDirectionsLimitSpeed", 1f, 0.75f..1f)
+    private val allDirectionsLimitSpeed by float("AllDirectionsLimitSpeed", 1f, 0.75f..1f)
         { mode == "Vanilla" && allDirections }
     private val allDirectionsLimitSpeedGround by boolean("AllDirectionsLimitSpeedOnlyGround", true)
         { mode == "Vanilla" && allDirections }
@@ -46,7 +46,6 @@ object Sprint : Module("Sprint", Category.MOVEMENT, gameDetecting = false) {
         { mode == "Vanilla" && checkServerSide }
     private val noPackets by boolean("NoPackets", false) { mode == "Vanilla" }
 
-    // Add missing getters for MixinEntityPlayerSP
     private val checkHunger by boolean("CheckHunger", true) { mode == "Vanilla" }
     private val checkCollision by boolean("CheckCollision", true) { mode == "Vanilla" }
     private val checkSneaking by boolean("CheckSneaking", true) { mode == "Vanilla" }
