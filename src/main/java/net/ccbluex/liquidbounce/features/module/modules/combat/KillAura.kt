@@ -406,6 +406,7 @@ object KillAura : Module("KillAura", Category.COMBAT, Keyboard.KEY_R) {
         
         if (cancelRun || (noInventoryAttack && (mc.currentScreen is GuiContainer || System.currentTimeMillis() - containerOpen < noInventoryDelay))) return
 
+        rotationSettings.applyStrafeFix()
         // Update target
         updateTarget()
 
