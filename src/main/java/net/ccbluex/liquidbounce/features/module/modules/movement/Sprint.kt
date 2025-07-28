@@ -16,9 +16,7 @@ import net.ccbluex.liquidbounce.utils.extensions.setSprintSafely
 import net.ccbluex.liquidbounce.utils.inventory.InventoryUtils.serverOpenInventory
 import net.ccbluex.liquidbounce.utils.rotation.RotationUtils.activeSettings
 import net.ccbluex.liquidbounce.utils.rotation.RotationUtils.currentRotation
-import net.ccbluex.liquidbounce.value.BooleanValue
-import net.ccbluex.liquidbounce.value.FloatValue
-import net.ccbluex.liquidbounce.value.ListValue
+import net.ccbluex.liquidbounce.config.*
 import net.minecraft.network.play.client.C0BPacketEntityAction
 import net.minecraft.potion.Potion
 import net.minecraft.util.MovementInput
@@ -27,34 +25,34 @@ import kotlin.math.abs
 object Sprint : Module("Sprint", Category.MOVEMENT, gameDetecting = false) {
     val mode by ListValue("Mode", arrayOf("Legit", "Vanilla"), "Vanilla")
 
-    val onlyOnSprintPress by BooleanValue("OnlyOnSprintPress", false)
-    private val alwaysCorrect by BooleanValue("AlwaysCorrectSprint", false)
+    val onlyOnSprintPress by boolean("OnlyOnSprintPress", false)
+    private val alwaysCorrect by boolean("AlwaysCorrectSprint", false)
 
-    val allDirections by BooleanValue("AllDirections", true) { mode == "Vanilla" }
-    val jumpDirections by BooleanValue("JumpDirections", false) { mode == "Vanilla" && allDirections }
+    val allDirections by boolean("AllDirections", true) { mode == "Vanilla" }
+    val jumpDirections by boolean("JumpDirections", false) { mode == "Vanilla" && allDirections }
 
     private val allDirectionsLimitSpeed by FloatValue("AllDirectionsLimitSpeed", 1f, 0.75f..1f)
         { mode == "Vanilla" && allDirections }
-    private val allDirectionsLimitSpeedGround by BooleanValue("AllDirectionsLimitSpeedOnlyGround", true)
+    private val allDirectionsLimitSpeedGround by boolean("AllDirectionsLimitSpeedOnlyGround", true)
         { mode == "Vanilla" && allDirections }
 
-    private val blindness by BooleanValue("Blindness", true) { mode == "Vanilla" }
-    private val usingItem by BooleanValue("UsingItem", false) { mode == "Vanilla" }
-    private val inventory by BooleanValue("Inventory", false) { mode == "Vanilla" }
-    private val food by BooleanValue("Food", true) { mode == "Vanilla" }
+    private val blindness by boolean("Blindness", true) { mode == "Vanilla" }
+    private val usingItem by boolean("UsingItem", false) { mode == "Vanilla" }
+    private val inventory by boolean("Inventory", false) { mode == "Vanilla" }
+    private val food by boolean("Food", true) { mode == "Vanilla" }
 
-    private val checkServerSide by BooleanValue("CheckServerSide", false) { mode == "Vanilla" }
-    private val checkServerSideGround by BooleanValue("CheckServerSideOnlyGround", false)
+    private val checkServerSide by boolean("CheckServerSide", false) { mode == "Vanilla" }
+    private val checkServerSideGround by boolean("CheckServerSideOnlyGround", false)
         { mode == "Vanilla" && checkServerSide }
-    private val noPackets by BooleanValue("NoPackets", false) { mode == "Vanilla" }
+    private val noPackets by boolean("NoPackets", false) { mode == "Vanilla" }
 
     // Add missing getters for MixinEntityPlayerSP
-    private val checkHunger by BooleanValue("CheckHunger", true) { mode == "Vanilla" }
-    private val checkCollision by BooleanValue("CheckCollision", true) { mode == "Vanilla" }
-    private val checkSneaking by BooleanValue("CheckSneaking", true) { mode == "Vanilla" }
-    private val forceSprint by BooleanValue("ForceSprint", false) { mode == "Vanilla" }
-    private val useItem by BooleanValue("UseItem", true) { mode == "Vanilla" }
-    private val useItemSword by BooleanValue("UseItemSword", false) { mode == "Vanilla" }
+    private val checkHunger by boolean("CheckHunger", true) { mode == "Vanilla" }
+    private val checkCollision by boolean("CheckCollision", true) { mode == "Vanilla" }
+    private val checkSneaking by boolean("CheckSneaking", true) { mode == "Vanilla" }
+    private val forceSprint by boolean("ForceSprint", false) { mode == "Vanilla" }
+    private val useItem by boolean("UseItem", true) { mode == "Vanilla" }
+    private val useItemSword by boolean("UseItemSword", false) { mode == "Vanilla" }
 
     private var isSprinting = false
 
