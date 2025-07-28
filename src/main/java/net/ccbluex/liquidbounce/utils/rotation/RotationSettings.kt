@@ -33,7 +33,7 @@ open class RotationSettings(owner: Module, generalApply: () -> Boolean = { true 
     open val shortStopDurationValue = intRange("ShortStopDuration", 1..2, 1..5) { simulateShortStop }
     open val strafeValue = boolean("Strafe", false) { rotationsActive && applyServerSide && generalApply() }
     open val strictValue = boolean("Strict", false) { strafeValue.isActive() && generalApply() }
-    open val strafeModeValue = ListValue("StrafeMode", arrayOf("Off", "Strict", "Silent"), "Silent") { rotationsActive && applyServerSide && generalApply() }
+    open val strafeModeValue = boolean("StrafeMode", arrayOf("Off", "Strict", "Silent"), "Silent") { rotationsActive && applyServerSide && generalApply() }
     open val keepRotationValue = boolean("KeepRotation", true) { rotationsActive && applyServerSide && generalApply() }
 
     open val resetTicksValue = int("ResetTicks", 1, 1..20) {
