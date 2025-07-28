@@ -46,13 +46,6 @@ object Sprint : Module("Sprint", Category.MOVEMENT, gameDetecting = false) {
         { mode == "Vanilla" && checkServerSide }
     private val noPackets by boolean("NoPackets", false) { mode == "Vanilla" }
 
-    private val checkHunger by boolean("CheckHunger", true) { mode == "Vanilla" }
-    private val checkCollision by boolean("CheckCollision", true) { mode == "Vanilla" }
-    private val checkSneaking by boolean("CheckSneaking", true) { mode == "Vanilla" }
-    private val forceSprint by boolean("ForceSprint", false) { mode == "Vanilla" }
-    private val useItem by boolean("UseItem", true) { mode == "Vanilla" }
-    private val useItemSword by boolean("UseItemSword", false) { mode == "Vanilla" }
-
     private var isSprinting = false
 
     override val tag
@@ -154,13 +147,6 @@ object Sprint : Module("Sprint", Category.MOVEMENT, gameDetecting = false) {
 
         return modifiedForward < threshold
     }
-
-    fun CheckHunger(): Boolean = checkHunger.get()
-    fun CheckCollision(): Boolean = checkCollision.get()
-    fun CheckSneaking(): Boolean = checkSneaking.get()
-    fun ForceSprint(): Boolean = forceSprint.get()
-    fun UseItem(): Boolean = useItem.get()
-    fun UseItemSword(): Boolean = useItemSword.get()
 
     val onPacket = handler<PacketEvent> { event ->
         if (mode == "Legit") {

@@ -379,12 +379,12 @@ public abstract class MixinEntityPlayerSP extends MixinAbstractClientPlayer {
 
         boolean attemptToggle = sprint.handleEvents() || isSprinting() || mc.gameSettings.keyBindSprint.isKeyDown();
         boolean baseIsMoving = (sprint.handleEvents() && sprint.getAllDirections() && (Math.abs(movementInput.moveForward) > 0.05f || Math.abs(movementInput.moveStrafe) > 0.05f)) || isSprintDirection;
-        boolean baseSprintState = (!sprint.getCheckHunger() && sprint.handleEvents() || (float) getFoodStats().getFoodLevel() > 6.0F || capabilities.allowFlying) && baseIsMoving && (!isCollidedHorizontally || sprint.getCheckCollision()) && (!isSneaking() || sprint.getCheckSneaking()) && !isPotionActive(Potion.blindness);
+        boolean baseSprintState = (sprint.handleEvents() || capabilities.allowFlying) && baseIsMoving && !isCollidedHorizontally && !isSneaking() && !isPotionActive(Potion.blindness);
         boolean canToggleSprint = onGround && !movementInput.jump && !movementInput.sneak && !isPotionActive(Potion.blindness);
         boolean isCurrentUsingItem = getHeldItem() != null && (isUsingItem() || (getHeldItem().getItem() instanceof ItemSword && killAura.getBlockStatus()) || NoSlow.INSTANCE.isUNCPBlocking());
         boolean isCurrentUsingSword = getHeldItem() != null && getHeldItem().getItem() instanceof ItemSword && (killAura.getBlockStatus() || isUsingItem());
 
-        baseSprintState = baseSprintState && !(inventoryMove.handleEvents() && inventoryMove.getNoSprint() && inventoryMove.getInvOpen());
+        baseSprintState = baseSprintState && !(inventoryMove.handleEvents());
 
         if (!attemptToggle && !lastForwardToggleState && baseSprintState && !isSprinting() && canToggleSprint && !isCurrentUsingItem && !isPotionActive(Potion.blindness)) {
             if (sprintToggleTimer <= 0 && !mc.gameSettings.keyBindSprint.isKeyDown()) {
@@ -394,7 +394,7 @@ public abstract class MixinEntityPlayerSP extends MixinAbstractClientPlayer {
             }
         }
 
-        if (sprint.getForceSprint() || baseSprintState && (!isCurrentUsingItem || (sprint.getUseItem() && (!sprint.getUseItemSword() || isCurrentUsingSword))) && attemptToggle) {
+        if (baseSprintState && (!isCurrentUsingItem || isCurrentUsingSword) && attemptToggle) {
             setSprinting(true);
         } else {
             setSprinting(false);
@@ -412,9 +412,9 @@ public abstract class MixinEntityPlayerSP extends MixinAbstractClientPlayer {
         }
 
         baseIsMoving = (sprint.handleEvents() && sprint.getAllDirections() && (Math.abs(movementInput.moveForward) > 0.05f || Math.abs(movementInput.moveStrafe) > 0.05f)) || isSprintDirection;
-        baseSprintState = (!sprint.getCheckHunger() && sprint.handleEvents() || (float) getFoodStats().getFoodLevel() > 6.0F || capabilities.allowFlying) && baseIsMoving && (!isCollidedHorizontally || sprint.getCheckCollision()) && (!isSneaking() || sprint.getCheckSneaking()) && !isPotionActive(Potion.blindness);
+        baseSprintState = (sprint.handleEvents() || (float) getFoodStats().getFoodLevel() > 6.0F || capabilities.allowFlying) && baseIsMoving && !isCollidedHorizontally && !isSneaking() && !isPotionActive(Potion.blindness);
 
-        if (sprint.getForceSprint() || baseSprintState && (!isCurrentUsingItem || (sprint.getUseItem() && (!sprint.getUseItemSword() || isCurrentUsingSword))) && attemptToggle) {
+        if (baseSprintState && (!isCurrentUsingItem || isCurrentUsingSword) && attemptToggle) {
             setSprinting(true);
         } else {
             setSprinting(false);

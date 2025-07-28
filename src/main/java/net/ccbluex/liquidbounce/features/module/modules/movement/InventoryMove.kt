@@ -58,9 +58,6 @@ object InventoryMove : Module("InventoryMove", Category.MOVEMENT, gameDetecting 
 
     private val inventoryMotion by float("InventoryMotion", 1F, 0F..2F)
 
-    private val noSprint by boolean("NoSprint", true)
-    private val invOpen by boolean("InvOpen", true)
-
     private val affectedBindings = arrayOf(
         mc.gameSettings.keyBindForward,
         mc.gameSettings.keyBindBack,
@@ -169,9 +166,6 @@ object InventoryMove : Module("InventoryMove", Category.MOVEMENT, gameDetecting 
             it.pressed = false
         }
     }
-
-    fun NoSprint(): Boolean = noSprint.get()
-    fun InvOpen(): Boolean = invOpen.get()
 
     override val tag
         get() = when {
