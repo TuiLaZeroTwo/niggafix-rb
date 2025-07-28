@@ -11,6 +11,7 @@ import net.ccbluex.liquidbounce.utils.extensions.*
 import net.minecraft.network.play.client.C03PacketPlayer
 import net.minecraft.client.settings.GameSettings
 import net.minecraft.util.Vec3
+import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.math.sqrt
@@ -30,6 +31,33 @@ object MovementUtils : MinecraftInstance, Listenable {
 
     var airTicks = 0
     var groundTicks = 0
+
+    /**
+     * Returns the jump motion value for the player.
+     * Typically 0.42F for a standard jump, adjusted for sprinting and potion effects.
+     */
+    fun getJumpMotion(): Float {
+        var jumpMotion = 0.42F
+        if (mc.thePlayer != null && mc.thePlayer.isSprinting) {
+            jumpMotion += 0.2F // Sprint jump boost
+        }
+        // Adjust for Jump Boost potion effect
+        if (mc.thePlayer != null && mc.thePlayer.isPotionActive(Potion.jump)) {
+            jumpMotion += (mc.thePlayer.getActivePotionEffect(Potion.jump).amplifier + 1) * 0.1F
+        }
+        return jumpMotion
+    }
+
+    /**
+     * Returns the yaw of the player's movement direction in degrees.
+     */
+    fun getMovingYaw(): Float {
+        val player = mc.thePlayer ?: return 0.0F
+        val moveX = player.motionX
+        val moveZ = player.motionZ
+        if (moveX == 0.0 && moveZ == 0.0) return player.rotationYaw // No movement, use player yaw
+        return (atan2(-moveX, moveZ) * 180.0 / Math.PI).toFloat() % 360.0F
+    }
 
     @JvmOverloads
     fun strafe(
@@ -83,6 +111,7 @@ object MovementUtils : MinecraftInstance, Listenable {
         zCoord = (cos(angle) * useSpeed) + prevZ
         return this
     }
+
     fun updateControls() {
         mc.gameSettings.keyBindForward.pressed = GameSettings.isKeyDown(mc.gameSettings.keyBindForward)
         mc.gameSettings.keyBindBack.pressed = GameSettings.isKeyDown(mc.gameSettings.keyBindBack)
@@ -143,6 +172,4 @@ object MovementUtils : MinecraftInstance, Listenable {
             }
         }
     }
-
-
 }
