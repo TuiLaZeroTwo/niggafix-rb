@@ -323,6 +323,17 @@ object RotationUtils : MinecraftInstance, Listenable {
     fun rotationDifference(a: Rotation, b: Rotation = serverRotation) =
         hypot(angleDifference(a.yaw, b.yaw), a.pitch - b.pitch)
 
+    /**
+     * Calculate difference between two yaw angles, normalized to [-180, 180].
+     * @param yaw1 First yaw angle in degrees
+     * @param yaw2 Second yaw angle in degrees
+     * @return The smallest angle difference in degrees
+     */
+    @JvmStatic
+    fun getAngleDifference(yaw1: Float, yaw2: Float): Float {
+        return abs(angleDifference(yaw1, yaw2))
+    }
+
     fun limitAngleChange(
         currentRotation: Rotation, targetRotation: Rotation, settings: RotationSettings
     ): Rotation {
