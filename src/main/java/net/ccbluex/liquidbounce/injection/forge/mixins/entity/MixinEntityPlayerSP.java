@@ -568,10 +568,9 @@ public abstract class MixinEntityPlayerSP extends MixinAbstractClientPlayer {
         }
     }
 
-    @Override
-    public void moveEntityємо
 
-(double x, double y, double z) {
+    @Override
+    public void moveEntity(double x, double y, double z) {
         MoveEvent moveEvent = new MoveEvent(x, y, z);
         EventManager.INSTANCE.call(moveEvent);
 
