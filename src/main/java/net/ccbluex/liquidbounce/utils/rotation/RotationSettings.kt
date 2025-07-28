@@ -122,8 +122,10 @@ open class RotationSettings(owner: Module, generalApply: () -> Boolean = { true 
      */
     fun applyStrafeFix() {
         if (!rotationsActive || !applyServerSide || strafeMode == "Off") return
-        val rinStrafe = LiquidBounce.moduleManager.getModule(RinStrafe::class.java)!!.state
-        rinStrafe.applyForceStrafe(strafeMode == "Silent", strafeMode != "Off")
+        val rinStrafe = LiquidBounce.moduleManager.getModule(RinStrafe::class.java)
+        if (rinStrafe != null && rinStrafe.state) {
+            rinStrafe.applyForceStrafe(strafeMode == "Silent", strafeMode != "Off")
+        }
     }
 
     init {
