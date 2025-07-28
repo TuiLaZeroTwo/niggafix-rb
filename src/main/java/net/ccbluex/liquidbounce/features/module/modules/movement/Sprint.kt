@@ -155,12 +155,12 @@ object Sprint : Module("Sprint", Category.MOVEMENT, gameDetecting = false) {
         return modifiedForward < threshold
     }
 
-    fun getCheckHunger(): Boolean = checkHunger.get()
-    fun getCheckCollision(): Boolean = checkCollision.get()
-    fun getCheckSneaking(): Boolean = checkSneaking.get()
-    fun getForceSprint(): Boolean = forceSprint.get()
-    fun getUseItem(): Boolean = useItem.get()
-    fun getUseItemSword(): Boolean = useItemSword.get()
+    fun CheckHunger(): Boolean = checkHunger.get()
+    fun CheckCollision(): Boolean = checkCollision.get()
+    fun CheckSneaking(): Boolean = checkSneaking.get()
+    fun ForceSprint(): Boolean = forceSprint.get()
+    fun UseItem(): Boolean = useItem.get()
+    fun UseItemSword(): Boolean = useItemSword.get()
 
     val onPacket = handler<PacketEvent> { event ->
         if (mode == "Legit") {

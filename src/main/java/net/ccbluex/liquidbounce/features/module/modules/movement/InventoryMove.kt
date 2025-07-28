@@ -170,8 +170,8 @@ object InventoryMove : Module("InventoryMove", Category.MOVEMENT, gameDetecting 
         }
     }
 
-    fun getNoSprint(): Boolean = noSprint.get()
-    fun getInvOpen(): Boolean = invOpen.get()
+    fun NoSprint(): Boolean = noSprint.get()
+    fun InvOpen(): Boolean = invOpen.get()
 
     override val tag
         get() = when {
