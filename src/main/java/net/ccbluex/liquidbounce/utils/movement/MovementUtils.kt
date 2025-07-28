@@ -10,6 +10,7 @@ import net.ccbluex.liquidbounce.utils.client.MinecraftInstance
 import net.ccbluex.liquidbounce.utils.extensions.*
 import net.minecraft.network.play.client.C03PacketPlayer
 import net.minecraft.client.settings.GameSettings
+import net.minecraft.potion.Potion
 import net.minecraft.util.Vec3
 import kotlin.math.atan2
 import kotlin.math.cos
